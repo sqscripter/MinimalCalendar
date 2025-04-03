@@ -180,12 +180,7 @@
             document.getElementById("note-modal").classList.remove("show");
         }
 
-        function saveNote() {
-            const noteText = document.getElementById("note-text").value;
-            localStorage.setItem(selectedDate, noteText);
-            renderCalendar();
-            closeModal();
-        }
+        
 
         function prevMonth() {
             currentMonth--;
@@ -238,6 +233,44 @@
         }
 
         renderCalendar();
+      // Function to encode and save all events in a single string
+function saveAllEvents() {
+    let daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    let eventArray = [];
+    for (let day = 1; day <= daysInMonth; day++) {
+        let dateKey = `${currentYear}-${currentMonth + 1}-${day}`;
+        eventArray.push(localStorage.getItem(dateKey) || "");
+    }
+    localStorage.setItem("events", eventArray.join(","));
+}
+
+// Function to load all events from the encoded string
+function loadAllEvents() {
+    let savedEvents = localStorage.getItem("events");
+    if (!savedEvents) return;
+    let eventArray = savedEvents.split(",");
+    let daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    for (let day = 1; day <= daysInMonth; day++) {
+        let dateKey = `${currentYear}-${currentMonth + 1}-${day}`;
+        if (eventArray[day - 1]) {
+            localStorage.setItem(dateKey, eventArray[day - 1]);
+        }
+    }
+}
+
+// Override the saveNote function to save all events at once
+function saveNote() {
+    const noteText = document.getElementById("note-text").value;
+    localStorage.setItem(selectedDate, noteText);
+    saveAllEvents();
+    renderCalendar();
+    closeModal();
+}
+
+// Load events when rendering the calendar
+loadAllEvents();
+renderCalendar();
+
     </script>
 </body>
 </html>
